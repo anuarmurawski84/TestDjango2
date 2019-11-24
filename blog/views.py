@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from datetime import datetime
 from django.shortcuts import render
 from django.views.generic.base import View
 from .models import Category, Tag, Post, Comment
@@ -7,9 +8,9 @@ from .models import Category, Tag, Post, Comment
 class HomeView(View):
     def get(self, request):
         category_list = Category.objects.all()
-        posts = Post.objects.all()
-        context = {"categories": category_list, "posts": posts}
-        return render(request, "blog/home.html", context)
+        post_list = Post.objects.filter(published_date__lte=datetime.now(), published=True)
+        context = {"categories": category_list, "post_list": post_list}
+        return render(request, "blog/post_list.html", context)
 
 
 class CategoryView(View):
@@ -19,10 +20,10 @@ class CategoryView(View):
         context = {"category": category}
         return render(request, "blog/post_list.html", context)
 
-class PostView(View):
-    #Вывод поста по ссылке
-    def get(self, request, post_slug):
-        #category = Category.objects.get(slug=category_slug)
-        post = Post.objects.get(slug=post_slug)
-        context = {"post": post}
-        return render(request, "blog/post.html", context)
+class PostDetailView(View):
+    #Вывод полной статьи по ссылке
+    def get(self, request, category, slug):
+        category_list = Category.objects.all()
+        post = Post.objects.get(slug=slug)
+        context = {"categories": category_list, "post": post}
+        return render(request, "blog/post_detail.html", context)
